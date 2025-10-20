@@ -1,0 +1,6 @@
+tensorflow==2.13.1
+tensorflow_hub
+librosa
+resampy
+streamlit
+numpy
