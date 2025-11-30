@@ -130,102 +130,197 @@ def get_prediction(file_data, yamnet_model, trained_model):
 
 
 # --- Build the Streamlit App ---
-st.set_page_config(layout="wide", page_title="Music Genre Classifier", page_icon="🎵")
+st.set_page_config(layout="wide", page_title="SonicPulse AI", page_icon="🔊")
 
-# --- Custom CSS for Futuristic Look ---
+# --- Custom CSS for SonicPulse Look ---
 st.markdown("""
 <style>
-    /* Main Background */
-    .stApp {
-        background-color: #0e1117;
-        background-image: linear-gradient(315deg, #0e1117 0%, #1a1c24 74%);
-        color: #ffffff;
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+    /* Animations */
+    @keyframes pulse {
+        0% { text-shadow: 0 0 10px #00d4ff; }
+        50% { text-shadow: 0 0 20px #00d4ff, 0 0 30px #9d00ff; }
+        100% { text-shadow: 0 0 10px #00d4ff; }
     }
     
-    /* Headers */
-    h1, h2, h3 {
-        font-family: 'Orbitron', sans-serif;
-        color: #00d4ff;
-        text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
-    }
-    
-    /* Buttons */
-    .stButton>button {
-        background: linear-gradient(45deg, #6a11cb 0%, #2575fc 100%);
-        color: white;
-        border: none;
-        border-radius: 25px;
-        padding: 10px 25px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        box-shadow: 0 0 15px rgba(106, 17, 203, 0.5);
-    }
-    .stButton>button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 25px rgba(37, 117, 252, 0.8);
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
     }
 
-    /* Progress Bar */
-    .stProgress > div > div > div > div {
-        background-image: linear-gradient(to right, #6a11cb, #2575fc);
+    /* Global Styles */
+    .stApp {
+        background-color: #050511;
+        background-image: 
+            radial-gradient(circle at 50% 0%, #1a1a40 0%, transparent 70%),
+            radial-gradient(circle at 80% 50%, #2a0a2e 0%, transparent 50%);
+        color: #ffffff;
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    /* Typography */
+    h1 {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 4.5rem !important;
+        background: linear-gradient(90deg, #00d4ff, #9d00ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: pulse 3s infinite;
+        margin-bottom: 0 !important;
     }
     
-    /* File Uploader */
+    h2, h3 {
+        font-family: 'Orbitron', sans-serif;
+        color: #e0e0e0;
+    }
+
+    .subtitle {
+        font-size: 1.5rem;
+        color: #a0a0ff;
+        margin-bottom: 3rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+    }
+
+    /* Glassmorphism Card */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease;
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-5px);
+        border-color: #00d4ff;
+    }
+
+    /* Neon Button */
+    .stButton>button {
+        background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 15px 40px;
+        font-size: 1.2rem;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        letter-spacing: 1px;
+        transition: all 0.4s ease;
+        box-shadow: 0 0 20px rgba(106, 17, 203, 0.6);
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stButton>button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 40px rgba(37, 117, 252, 0.8);
+    }
+
+    /* File Uploader - Glass Style */
     .stFileUploader {
-        border: 1px dashed #00d4ff;
-        border-radius: 10px;
-        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        transition: border-color 0.3s;
+    }
+    
+    .stFileUploader:hover {
+        border-color: #00d4ff;
+    }
+
+    /* Center Button */
+    div.stButton > button {
+        display: block;
+        margin: 0 auto;
+        width: auto;
+        min-width: 200px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🎵 AI Music Genre Classifier")
-st.markdown("### *Experience the Future of Sound Analysis*")
+# --- Layout ---
+# Removed empty columns for a centered, full-width look
+st.markdown("<div style='text-align: center; margin-top: 20px;'><h1>SONIC PULSE AI</h1></div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center;' class='subtitle'>Advanced Audio Intelligence System</div>", unsafe_allow_html=True)
+
+# Introduction Text
+st.markdown("""
+<div style='text-align: center; color: #e0e0e0; margin-bottom: 40px; font-size: 1.1rem; max-width: 800px; margin-left: auto; margin-right: auto;'>
+    Welcome to <strong>SonicPulse AI</strong>. Unlock the secrets of your music with our advanced neural network technology. 
+    Simply upload your audio file (WAV or MP3), and our AI will analyze the frequency patterns to identify the genre with high precision. 
+    Experience the future of sound analysis today.
+</div>
+""", unsafe_allow_html=True)
 
 # Load models
-with st.spinner('Initializing Neural Networks...'):
+with st.spinner('Initializing Neural Core...'):
     yamnet = load_yamnet_model()
     model = load_trained_model()
 
-st.success('System Online. Models Loaded.')
-
-uploaded_file = st.file_uploader("Upload Audio Stream (WAV, MP3)", type=["wav", "mp3", "au"])
+# Main Content Area
+# Removed wrapper div to prevent empty box issue
+uploaded_file = st.file_uploader("Initialize Audio Stream", type=["wav", "mp3", "au"])
 
 if uploaded_file is not None:
-    col1, col2 = st.columns([1, 2])
+    # Vertical Layout: Audio Player -> Button -> Results
     
-    with col1:
-        st.info("Audio Stream Detected")
-        st.audio(uploaded_file)
+    # Removed wrapper div
+    st.markdown("### 📡 Audio Stream Detected")
+    st.audio(uploaded_file)
     
-    with col2:
-        if st.button("Analyze Frequency Spectrum"):
-            with st.spinner("Processing Neural Pathways..."):
-                file_data = BytesIO(uploaded_file.getvalue())
-                
-                probabilities = get_prediction(file_data, yamnet, model)
+    # Audio Stats
+    file_details = {"Filename": uploaded_file.name, "File size": f"{uploaded_file.size / 1024:.2f} KB"}
+    st.markdown(f"""
+    <div style='margin-top: 15px; margin-bottom: 30px; font-size: 0.9rem; color: #a0a0ff;'>
+        <p><strong>FILE:</strong> {file_details['Filename']}</p>
+        <p><strong>SIZE:</strong> {file_details['File size']}</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Centered Button (handled by CSS)
+    analyze_button = st.button("INITIATE ANALYSIS")
+    
+    if analyze_button:
+        with st.spinner("Scanning Frequencies..."):
+            file_data = BytesIO(uploaded_file.getvalue())
+            probabilities = get_prediction(file_data, yamnet, model)
 
-                if isinstance(probabilities, str):
-                    st.error(probabilities)
-                else:
-                    top_genre = max(probabilities, key=probabilities.get)
-                    top_confidence = probabilities[top_genre]
-                    
-                    st.markdown(f"""
-                    <div style="text-align: center; padding: 20px; border: 2px solid #00d4ff; border-radius: 15px; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);">
-                        <h2 style="margin:0;">Detected Genre</h2>
-                        <h1 style="font-size: 3em; margin: 10px 0;">{top_genre.upper()}</h1>
-                        <h3 style="color: #a0a0a0;">Confidence: {top_confidence:.1%}</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    st.markdown("---")
-                    
-                    import pandas as pd
-                    chart_data = pd.DataFrame({
-                        'Genre': list(probabilities.keys()),
-                        'Probability': list(probabilities.values())
-                    })
-                    
-                    st.subheader("Probability Distribution")
-                    st.bar_chart(chart_data.set_index('Genre'), color="#00d4ff")
+            if isinstance(probabilities, str):
+                st.error(probabilities)
+            else:
+                top_genre = max(probabilities, key=probabilities.get)
+                top_confidence = probabilities[top_genre]
+                
+                # Results Display (Vertical)
+                st.markdown(f"""
+                <div class='glass-card' style='text-align: center; border: 2px solid #00d4ff; box-shadow: 0 0 30px rgba(0, 212, 255, 0.2); animation: float 6s ease-in-out infinite; margin-top: 20px;'>
+                    <h3 style='margin:0; color: #00d4ff; letter-spacing: 2px;'>PRIMARY CLASSIFICATION</h3>
+                    <h1 style='font-size: 4rem; margin: 15px 0; background: linear-gradient(to right, #fff, #b0b0b0); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{top_genre.upper()}</h1>
+                    <p style='font-size: 1.3rem; color: #a0a0ff;'>Confidence Level: {top_confidence:.1%}</p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Full Width Chart
+                st.markdown("---")
+                st.markdown("### 🧬 Audio DNA Sequence")
+                
+                import pandas as pd
+                chart_data = pd.DataFrame({
+                    'Genre': list(probabilities.keys()),
+                    'Probability': list(probabilities.values())
+                })
+                
+                st.bar_chart(chart_data.set_index('Genre'), color="#9d00ff")
