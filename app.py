@@ -204,43 +204,6 @@ def get_prediction(file_data, yamnet_model, trained_model):
     # 1. Load and resample audio
     waveform, _ = librosa.load(file_data, sr=SR, mono=True)
 
-    # 2. Get segments
-    segments = load_audio_segments(waveform)
-    if not segments:
-        return "Could not process audio (file too short?)" # Return a string error message
-
-    # 3. Get embeddings
-    seg_embs = []
-    for seg in segments:
-        emb = compute_segment_embedding(seg, yamnet_model)
-        seg_embs.append(emb)
-
-    # 4. Pad/Truncate embeddings sequence
-    if len(seg_embs) >= MAX_LEN:
-        seq = np.stack(seg_embs[:MAX_LEN], axis=0)
-    else:
-        pad_count = MAX_LEN - len(seg_embs)
-        pad = np.zeros((pad_count, EMBEDDING_SIZE), dtype=np.float32)
-        seq = np.concatenate([np.stack(seg_embs, axis=0), pad], axis=0)
-
-    # Add batch dimension
-    seq = np.expand_dims(seq, axis=0).astype(np.float32)
-
-    # 5. Make prediction
-    # These labels must match the order from your notebook's LabelEncoder
-    labels = ['blues', 'classical', 'country', 'disco', 'hiphop',
-              'jazz', 'metal', 'pop', 'reggae', 'rock']
-
-    preds = trained_model.predict(seq)
-    
-    # Return dictionary of all probabilities
-    probabilities = dict(zip(labels, preds[0]))
-    return probabilities
-
-
-# --- Build the Streamlit App ---
-st.set_page_config(layout="wide", page_title="Music Genre Classifier", page_icon="🎵")
-
 # --- Custom CSS for Futuristic Look ---
 st.markdown("""
 <style>
