@@ -7,14 +7,12 @@ import resampy
 from io import BytesIO
 from tensorflow.keras.layers import Layer
 
-# --- Constants ---
 SR = 16000
 SEGMENT_SECONDS = 10
 HOP_SECONDS = 5
 EMBEDDING_SIZE = 1024
 MAX_LEN = 5 
 
-# --- Custom Layer Definition ---
 class AttentionLayer(Layer):
     def __init__(self, **kwargs):
         super(AttentionLayer, self).__init__(**kwargs)
@@ -33,7 +31,6 @@ class AttentionLayer(Layer):
          config = super(AttentionLayer, self).get_config()
          return config
 
-# --- Caching the models ---
 @st.cache_resource
 def load_yamnet_model():
     return hub.load('yamnet_1')
@@ -44,7 +41,6 @@ def load_trained_model():
         model = tf.keras.models.load_model('yamnet_gtzan_model.h5')
     return model
 
-# --- Helper functions ---
 def load_audio_segments(waveform, sr=SR, segment_seconds=SEGMENT_SECONDS, hop_seconds=HOP_SECONDS):
     seg_len = int(segment_seconds * sr)
     hop_len = int(hop_seconds * sr)
@@ -68,23 +64,18 @@ def compute_segment_embedding(waveform_segment, yamnet_model):
     scores, embeddings, spec = yamnet_model(waveform)
     return np.mean(embeddings.numpy(), axis=0)
 
-# --- Main Prediction Function (Full Song Scan) ---
 def get_prediction(file_data, yamnet_model, trained_model):
-    # 1. Load and resample audio
     waveform, _ = librosa.load(file_data, sr=SR, mono=True)
 
-    # 2. Get segments
     segments = load_audio_segments(waveform)
     if not segments:
         return "Could not process audio (file too short?)"
 
-    # 3. Get embeddings
     seg_embs = []
     for seg in segments:
         emb = compute_segment_embedding(seg, yamnet_model)
         seg_embs.append(emb)
 
-    # 4. Process in batches (Sliding Window)
     all_preds = []
     num_segments = len(seg_embs)
     
@@ -101,7 +92,6 @@ def get_prediction(file_data, yamnet_model, trained_model):
         all_preds.append(preds[0])
         
     else:
-        # Non-overlapping chunks of 5
         stride = MAX_LEN 
         for i in range(0, num_segments, stride):
             chunk = seg_embs[i : i + MAX_LEN]
@@ -116,7 +106,6 @@ def get_prediction(file_data, yamnet_model, trained_model):
             preds = trained_model.predict(seq)
             all_preds.append(preds[0])
 
-    # 5. Average the predictions
     if not all_preds:
          return "Error: No predictions made."
          
@@ -129,10 +118,8 @@ def get_prediction(file_data, yamnet_model, trained_model):
     return probabilities
 
 
-# --- Build the Streamlit App ---
 st.set_page_config(layout="wide", page_title="SonicPulse AI", page_icon="🔊")
 
-# --- Custom CSS for SonicPulse Look ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
@@ -251,12 +238,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Layout ---
-# Removed empty columns for a centered, full-width look
 st.markdown("<div style='text-align: center; margin-top: 20px;'><h1>SONIC PULSE AI</h1></div>", unsafe_allow_html=True)
 st.markdown("<div style='text-align: center;' class='subtitle'>Advanced Audio Intelligence System</div>", unsafe_allow_html=True)
 
-# Introduction Text
 st.markdown("""
 <div style='text-align: center; color: #e0e0e0; margin-bottom: 40px; font-size: 1.1rem; max-width: 800px; margin-left: auto; margin-right: auto;'>
     Welcome to <strong>SonicPulse AI</strong>. Unlock the secrets of your music with our advanced neural network technology. 
@@ -265,23 +249,16 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Load models
 with st.spinner('Initializing Neural Core...'):
     yamnet = load_yamnet_model()
     model = load_trained_model()
 
-# Main Content Area
-# Removed wrapper div to prevent empty box issue
 uploaded_file = st.file_uploader("Initialize Audio Stream", type=["wav", "mp3", "au"])
 
 if uploaded_file is not None:
-    # Vertical Layout: Audio Player -> Button -> Results
-    
-    # Removed wrapper div
     st.markdown("### 📡 Audio Stream Detected")
     st.audio(uploaded_file)
     
-    # Audio Stats
     file_details = {"Filename": uploaded_file.name, "File size": f"{uploaded_file.size / 1024:.2f} KB"}
     st.markdown(f"""
     <div style='margin-top: 15px; margin-bottom: 30px; font-size: 0.9rem; color: #a0a0ff;'>
@@ -290,7 +267,6 @@ if uploaded_file is not None:
     </div>
     """, unsafe_allow_html=True)
     
-    # Centered Button (handled by CSS)
     analyze_button = st.button("INITIATE ANALYSIS")
     
     if analyze_button:
@@ -304,7 +280,6 @@ if uploaded_file is not None:
                 top_genre = max(probabilities, key=probabilities.get)
                 top_confidence = probabilities[top_genre]
                 
-                # Results Display (Vertical)
                 st.markdown(f"""
                 <div class='glass-card' style='text-align: center; border: 2px solid #00d4ff; box-shadow: 0 0 30px rgba(0, 212, 255, 0.2); animation: float 6s ease-in-out infinite; margin-top: 20px;'>
                     <h3 style='margin:0; color: #00d4ff; letter-spacing: 2px;'>PRIMARY CLASSIFICATION</h3>
@@ -313,7 +288,6 @@ if uploaded_file is not None:
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # Full Width Chart
                 st.markdown("---")
                 st.markdown("### 🧬 Audio DNA Sequence")
                 
